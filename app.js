@@ -3,7 +3,11 @@ var app = express()
 var sqlite = require('sqlite3')
 var db = new sqlite.Database('data.db')
 var querystring = require('querystring')
-app.get('/', function(request, response) {
+app.get('/', function (req, res) {
+	res.send("This server is working. Query at /api?drg=###.")
+})
+app.get('/api', function(request, response) {
+	if (request.query.drg)
     var drg = request.query.drg;
     var json = null
     db.serialize(function() {
