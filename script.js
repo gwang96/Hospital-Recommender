@@ -1,9 +1,58 @@
+var svg = d3.select('body').append('svg')
+	.attr('width', 80)
+	.attr('height', 400)
+	.attr('class', 'legend');
+var legend = svg.append('g')
+		.attr('transform', 'translate(10,100)')
+	.append('defs')
+	.append('svg:linearGradient')
+		.attr('id', 'gradient')
+		.attr('x1', '100%')
+		.attr('y1', '0%')
+		.attr('x2', '100%')
+		.attr('y2', '100%')
+		.attr('spreadMethod', 'pad');
+svg.append('text')
+	.attr('y', 11)
+	.text('High Cost');
+svg.append('text')
+	.attr('y', 330)
+	.text('Low Cost');
+legend.append('stop')
+	.attr('offset', '0%')
+	.attr('stop-color', '#ff5c33')
+	.attr('stop-opacity', 1);
+legend.append('stop')
+	.attr('offset', '100%')
+	.attr('stop-color', '#adebad')
+	.attr('stop-opacity', 1);
+svg.append('rect')
+	.attr('width', 50)
+	.attr('height', 300)
+	.attr('y', 5)
+	.style('fill', 'url(#gradient)')
+	.attr('transform', 'translate(0,10)');
+
 function queryData() {
 	overlay = null;
 	d3.selectAll('.providers').remove();
 	var drg = document.getElementById('diag').value;
-	var zip = document.getElementById('location').value;
-	d3.json('https://hospital-recommender.herokuapp.com/api?drg=' + drg + '&zip=' + zip, (error, data) => {
+	var city = document.getElementById('location').value;
+	if (city == '') {
+		center = 'us';
+		zoom = 4;
+	} else {
+		center = city + ',us';
+		zoom = 10;
+	}
+	var geocoder = new google.maps.Geocoder();
+	geocoder.geocode({'address': center}, function(results, status) {
+		if (status == google.maps.GeocoderStatus.OK) {
+			map.setCenter(results[0].geometry.location);
+			map.setZoom(zoom);
+		}
+	})
+	d3.json('https://hospital-recommender.herokuapp.com/api?drg=' + drg + '&city=' + city, (error, data) => {
 		console.log(data);
 		var providers = [];
 		for (var i = 0; i < data.length; i++) {
@@ -14,47 +63,37 @@ function queryData() {
 }
 
 function drawOverlay(data) {
-	var providers = [];
 	var colors = d3.scale.linear()
 		.domain([d3.min(data, (d) => d['Average Total Payments']), d3.max(data, (d) => d['Average Total Payments'])])
-		.range(['#d7191c', '#2c7bb6'])
+		.range(['#adebad', '#ff5c33'])
 		.interpolate(d3.interpolateHcl);
 	console.log(colors);
+	var infowindow = new google.maps.InfoWindow();
+	for (var i = 0; i < data.length ; i++) {
+		var contentString = '<h3>' + data[i]['Provider Name'] + '</h3>'  + '<p> Address: ' + data[i]['Provider Street Address'] + ', ' + data[i]['Provider City'] + ', ' + data[i]['Provider State'] + " " + data[i]['Provider Zip Code'] + '</p>' + '<p1> Average Total Payments: $' + parseFloat(data[i]['Average Total Payments']).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,')  + '</p1>' + '<br><br>' + '<p2> Total Discharges:' + data[i]['Total Discharges'] + '<p2>';
+		var circle = {
+			path: 'M-5,0a5,5 0 1,0 10,0a5,5 0 1,0 -10,0',
+			fillColor: colors(data[i]['Average Total Payments']),
+			fillOpacity: 1
+		}
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(data[i].coord.lat, data[i].coord.lng),
+			icon: circle,
+			map: map
+		});
 
-	overlay = new google.maps.OverlayView();
-	overlay.onAdd = function() {
-		var layer = d3.select(this.getPanes().overlayLayer).append('div')
-				.attr('class', 'providers');
-
-		overlay.draw = function() {
-			var projection = this.getProjection();
-			var padding = 10;
-
-			var marker = layer.selectAll('svg')
-				.data(data)
-				.each(transform)
-				.enter().append('svg')
-					.each(transform)
-					.attr('class', 'marker');
-			marker.append('circle')
-				.attr('r', 5)
-				.attr('cx', padding)
-				.attr('cy', padding)
-				.attr('fill', (d) => colors(d['Average Total Payments']));
-
-			function transform(d) {
-				if (d.coord != undefined) {
-					var d = new google.maps.LatLng(d.coord.lat, d.coord.lng);
-					console.log(d);
-					d = projection.fromLatLngToDivPixel(d);
-					return d3.select(this)
-						.style('left', (d.x - padding) + 'px')
-						.style('top', (d.y - padding) + 'px');
-				}
+		google.maps.event.addListener(marker, 'mouseover', (function(marker, contentString, infowindow) {
+			return function() {
+				infowindow.setContent(contentString);
+				infowindow.open(map, marker);
 			}
-		};
-	};
-	overlay.setMap(map);
+		})(marker, contentString, infowindow));
+		google.maps.event.addListener(marker, 'mouseout', function() {
+			infowindow.close();
+		});
+	}
+
+
 }
 
 function addCoord(addr, obj, list, length) {
@@ -78,7 +117,7 @@ function addCoord(addr, obj, list, length) {
 			}
 		}
 	});
-}	
+}
 function initMap() {
 	var center = new google.maps.LatLng(41.850033, -95.6500523);
 	map = new google.maps.Map(document.getElementById('map'), {
