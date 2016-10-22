@@ -18,17 +18,22 @@ var allowCrossDomain = function(req, res, next) {
 app.use(allowCrossDomain);
 
 app.get('/', function(req, res) {
-    res.send("This server is working. Query at /api?drg=###.")
+    res.send("This server is working. Query at /api?drg=###&zip=#####.")
 })
 app.get('/api', function(request, response) {
+	var drg = '%'
+	var zip = '%'
     if (request.query.drg)
-        var drg = request.query.drg;
+        drg = request.query.drg;
+    if (request.query.zip)
+    	zip = request.query.zip;
     var json = null
     db.serialize(function() {
         db.all('Select "Provider Name", "Provider Street Address",' +
             '"Provider City", "Provider State", "Provider Zip Code",' +
             '"Total Discharges", "Average Total Payments"' +
-            'From disease where "DRG Number" = ' + 1,
+            'From disease where "DRG Number" = ' + 1 + 
+            ' and "Provider Zip Code = "' + zip,
             function(err, rows) {
                 response.send(rows)
             });
