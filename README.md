@@ -10,6 +10,7 @@ This should return a list of JSON Objects that have the fields
 	- Provider Zip Code
 	- Total Discharges
 	- Average Total Payments
+## Sample Usage
 
 # Google Slides Presentation
 https://docs.google.com/presentation/d/10jE9n_--NdqLsR0jcwW07EpLQwoIACaqzsSLtL65hBk/edit?usp=sharing 
