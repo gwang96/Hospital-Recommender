@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+	<style type="text/css">
+		#map {
+			width: 750px;
+			height: 500px;
+		}
+		#map * {
+			overflow: visible;
+		}
+		
+		.providers, .providers svg {
+			position: absolute;
+		}
+	</style>
+	<script src="d3.v3.min.js"></script>
+	<script asyc defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxmtlqTo54k_-7odWClR15yXXpr4gFITs&libraries=drawing&callback=initMap">
+	<script src="topojson/topojson.min.js"></script>
+	<body>
+		<form id="form" action="">
+			<input type="text" id="diag" placeholder="diagnosis">
+			<input type="text" id="location" placeholder="location">
+			<input type="submit" value="Submit" onclick="queryData(); return false;">
+		</form>
+		<div id="map">
+		</div>
+	</body>
+	<script src="script.js"></script>
+</html>
