@@ -1,0 +1,25 @@
+{
+  "name": "Hospital-Recommender",
+  "version": "1.0.0",
+  "description": "",
+  "main": "d3.v3.min.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "sqlite3": "^3.1.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gwang96/Hospital-Recommender.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gwang96/Hospital-Recommender/issues"
+  },
+  "homepage": "https://github.com/gwang96/Hospital-Recommender"
+}
