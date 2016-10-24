@@ -1,5 +1,6 @@
 # Polo-Care
-
+An interactive app that visualizes a set of nodes representing nearby hospitals that offer treatment and prices for a certain disease falling within a Diagnosis-Related Group (DRG). Further steps to this project would be using patient readmission rates to compute a cost-benefit analysis.
+The datasets used can be found at data.cms.gov.
 ## Usage
 Query this server at /api?drg=###.
 This should return a list of JSON Objects that have the fields
